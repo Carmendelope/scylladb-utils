@@ -5,3 +5,31 @@
 [[constraint]]
     name="github.com/spf13/cobra"
     version="v0.0.3"
+
+[[constraint]]
+    name="github.com/nalej/grpc-common-go"
+    version="=v0.0.30"
+
+[[constraint]]
+    name="github.com/nalej/derrors"
+    version="=v2.0.0"
+
+[[constraint]]
+    name="github.com/scylladb/gocqlx"
+    version="=v1.3.1"
+
+[[override]]
+  source = "https://github.com/fsnotify/fsnotify/archive/v1.4.7.tar.gz"
+  name = "gopkg.in/fsnotify.v1"
+
+[[constraint]]
+    name="github.com/onsi/ginkgo"
+    version="v1.6.0"
+
+[[constraint]]
+    name="github.com/onsi/gomega"
+    version="v1.4.2"
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  version = "1.1.0"
