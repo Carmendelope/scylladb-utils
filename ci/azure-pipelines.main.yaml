@@ -1,37 +1,31 @@
-variables: 
-  - name: appList
-    value: 'example-app other-app'  # Space separated list of apps to build
-  - name: imageList
-    value: 'example-app' # Space separated list of docker images to build
-  - group: common-vars
-  - group: slack-webhooks
-  - group: docker-registries
-  - group: ci-service-principal
-  - group: ssh-credentials
-  - name: GOBIN
-    value: '$(GOPATH)/bin'
-  - name: GOROOT
-    value: '/usr/local/go1.11'
-  - name: GOPATH
-    value: '$(system.defaultWorkingDirectory)/gopath'
-  - name: modulePath
-    value: '$(GOPATH)/src/github.com/$(Build.Repository.Name)'
-  - name: authorName
-    value: ""
+variables:
+- group: common-vars
+- group: slack-webhooks
+- group: ssh-credentials
+- name: GOBIN
+  value: '$(GOPATH)/bin'
+- name: GOROOT
+  value: '/usr/local/go1.11'
+- name: GOPATH
+  value: '$(system.defaultWorkingDirectory)/gopath'
+- name: modulePath
+  value: '$(GOPATH)/src/github.com/$(Build.Repository.Name)'
+- name: authorName
+  value: ""
 
 resources:
   repositories:
-    - repository: ci_templates
-      type: github
-      name: nalej/ci-templates
-      endpoint: nalej
+  - repository: ci_templates
+    type: github
+    name: nalej/ci-templates
+    endpoint: nalej
 
 jobs:
 - job: MainWorkflow
 
   pool:
     vmImage: 'Ubuntu-16.04'
-  
+
   steps:
   - template: misc/variables.yaml@ci_templates
 
@@ -65,33 +59,6 @@ jobs:
     parameters:
       modulePath: $(modulePath)
 
-  - template: go/build.yaml@ci_templates
-    parameters:
-      modulePath: $(modulePath)
-      appList: $(appList)
-  
-  - template: docker/login.yaml@ci_templates
-    parameters:
-      username: $(spAppId)
-      password: $(spPassword)
-      dockerRegistry: $(stagingDockerRegistry)
-    
-  - template: docker/build.yaml@ci_templates
-    parameters:
-      modulePath: $(modulePath)
-      imageList: $(imageList)
-      dockerRegistry: $(stagingDockerRegistry)
-  
-  - template: docker/push.yaml@ci_templates
-    parameters:
-      modulePath: $(modulePath)
-      imageList: $(imageList)
-      dockerRegistry: $(stagingDockerRegistry)
-    
-  - template: docker/logout.yaml@ci_templates
-    parameters:
-      dockerRegistry: $(stagingDockerRegistry)
-
   - template: slack/build/finish.yaml@ci_templates
     parameters:
       author: $(authorName)
@@ -100,7 +67,7 @@ jobs:
       commit: $(Build.SourceVersionMessage)
       buildUrl: $(buildUrl)$(Build.BuildId)
       slackWebhook: $(slackBuilds)
-  
+
   - template: slack/build/failed.yaml@ci_templates
     parameters:
       author: $(authorName)
