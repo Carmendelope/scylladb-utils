@@ -23,7 +23,7 @@ package scylladb
 
 import (
 	"github.com/google/uuid"
-	"github.com/nalej/scylladb-utils/internal/pkg/utils"
+	"github.com/nalej/scylladb-utils/pkg/utils"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/rs/zerolog/log"
