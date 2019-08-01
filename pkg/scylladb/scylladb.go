@@ -98,7 +98,7 @@ func (s *ScyllaDB) UnsafeGenericExist(table string, pkColumn string, pkValue str
 		}
 	}
 
-	return count == 1, nil
+	return count > 0, nil
 }
 
 // UnsafeAdd adds a new element to a table identified by a single primary key.
@@ -255,7 +255,7 @@ func (s * ScyllaDB) UnsafeGenericCompositeExist(table string, pkColumn map[strin
 		}
 	}
 
-	return count == 1, nil
+	return count > 0, nil
 }
 
 // UnsafeAdd adds a new element to a table identified by a composite primary key.
