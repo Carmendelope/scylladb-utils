@@ -5,13 +5,11 @@ variables:
 - name: GOBIN
   value: '$(GOPATH)/bin'
 - name: GOROOT
-  value: '/usr/local/go1.11'
+  value: '/usr/local/go1.12'
 - name: GOPATH
   value: '$(system.defaultWorkingDirectory)/gopath'
 - name: modulePath
   value: '$(GOPATH)/src/github.com/$(Build.Repository.Name)'
-- name: authorName
-  value: ""
 
 resources:
   repositories:
@@ -19,6 +17,7 @@ resources:
     type: github
     name: nalej/ci-templates
     endpoint: nalej
+    tags: v1.0.1
 
 jobs:
 - job: MainWorkflow
@@ -28,6 +27,8 @@ jobs:
 
   steps:
   - template: misc/variables.yaml@ci_templates
+
+  - template: misc/nalej-component.yaml@ci_templates
 
   - template: slack/build/start.yaml@ci_templates
     parameters:
@@ -53,6 +54,10 @@ jobs:
     parameters:
       sshHostName: $(hostName)
       sshPublicKey: $(sshPublicKey)
+      modulePath: $(modulePath)
+
+  - template: go/gofmt.yaml@ci_templates
+    parameters:
       modulePath: $(modulePath)
 
   - template: go/test.yaml@ci_templates

@@ -1,6 +1,10 @@
 {
     "language": "golang",
+    "version": "v0.0.1",
     "application_list": [
+        "example-app other-app"
+    ],
+    "image_list": [
         "example-app other-app"
     ],
     "tools": [
