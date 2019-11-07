@@ -2,9 +2,9 @@
 
 This repository contains Scylladb helpers for building providers in Go
 
-## Guidelines
+## Getting Started
 
-There are three types of functions
+There are four types of functions
 
 - Functions to manage the connection:
     - Connect
@@ -36,67 +36,78 @@ and a `sync.Mutex` to avoid concurrent access to Session
 ```
 # type declaration
 type ScyllaXXProvider struct {
-	scylladb.ScyllaDB
-	sync.Mutex
+    scylladb.ScyllaDB
+    sync.Mutex
 }
 
 # funcion to build a provider (and connect it)
-func NewScyllaXXProvider(address string, port int, keyspace string) * ScyllaAssetProvider{
-	provider := ScyllaXXProvider{
-		ScyllaDB : scylladb.ScyllaDB{
-			Address: address,
-			Port : port,
-			Keyspace: keyspace,
-		},
-	}
-	provider.Connect()
-	return &provider
+func NewScyllaXXProvider(address string, port int, keyspace string) * ScyllaXXProvider{
+    provider := ScyllaXXProvider{
+        ScyllaDB : scylladb.ScyllaDB{
+            Address: address,
+            Port : port,
+            Keyspace: keyspace,
+        },
+    }
+    provider.Connect()
+    return &provider
 }
 
 func (sp *ScyllaXXProvider) Disconnect() {
-	sp.Lock()
-	defer sp.Unlock()
-	sp.ScyllaDB.Disconnect()
+    sp.Lock()
+    defer sp.Unlock()
+    sp.ScyllaDB.Disconnect()
 }
 
 
 func (sp *ScyllaXXProvider) Add(registry entities.Registry) derrors.Error {
-	sp.Lock()
-	defer sp.Unlock()
-	log.Debug().Interface("registry", registry).Msg("provider add registry")
-	# one field in the primary key
-	return sp.UnsafeAdd(Table, TablePK, pkValue, columns, registry)
-	# more than one value in the primary key
-	return UnsafeCompositeAdd(Table, PkMap, Columns, registry) 
-	
+    sp.Lock()
+    defer sp.Unlock()
+    log.Debug().Interface("registry", registry).Msg("provider add registry")
+    # one field in the primary key
+    return sp.UnsafeAdd(Table, TablePK, pkValue, columns, registry)
+    # more than one value in the primary key
+    return UnsafeCompositeAdd(Table, PkMap, Columns, registry) 
+    
 }
 func (sp *ScyllaXXProvider) Update(registry entities.Registry) derrors.Error {
-	sp.Lock()
-	defer sp.Unlock()
-	return sp.UnsafeUpdate(Table, TablePK, registry.id, AllColumnsNoPK, asset)
+    sp.Lock()
+    defer sp.Unlock()
+    # one field in the primary key
+    return sp.UnsafeUpdate(Table, TablePK, registry.id, AllColumnsNoPK, asset)
+    # more than one value in the primary key
+    return UnsafeCompositeUpdate(Table, PkMap, Columns, registry) 
 }
 
 func (sp *ScyllaXXProvider) Exists(id string) (bool, derrors.Error) {
-	sp.Lock()
-	defer sp.Unlock()
-	return sp.UnsafeGenericExist(Table, TablePK, id)
+    sp.Lock()
+    defer sp.Unlock()
+    # one field in the primary key
+    return sp.UnsafeGenericExist(Table, TablePK, id)
+    # more than one value in the primary key
+    return UnsafeGenericCompositeExist(Table, PkMap)
 }
 
 func (sp *ScyllaXXProvider) Get(id string) (*entities.Registry, derrors.Error) {
-	sp.Lock()
-	defer sp.Unlock()
-	var result interface{} = &entities.Registry{}
-	err := sp.UnsafeGet(Table, TablePK, id, Columns, &result)
-	if err != nil{
-		return nil, err
-	}
-	return result.(*entities.Registry), nil
-	
+    sp.Lock()
+    defer sp.Unlock()
+    var result interface{} = &entities.Registry{}
+    # one field in the primary key
+    err := sp.UnsafeGet(Table, TablePK, id, Columns, &result)
+    # more than one value in the primary key
+    err := sp.UnsafeCompositeGet(Table, pkMap, Columns, registry)
+    if err != nil{
+        return nil, err
+    }
+    return result.(*entities.Registry), nil
+    
 func (sp *ScyllaXXProvider) Remove(id string) derrors.Error {
-	sp.Lock()
-	defer sp.Unlock()
-	return sp.UnsafeRemove(Table, TablePK, id)
-}
+    sp.Lock()
+    defer sp.Unlock()
+    # one field in the primary key
+    return sp.UnsafeRemove(Table, TablePK, id)
+    # more than one value in the primary key   
+    return sp.UnsafeCompositeRemove(Table, pkMap)
 }
 
 ```
@@ -109,3 +120,79 @@ where:
  - `Registry` is the record to be stored
  
  Note: `List method` must be implemented by the user
+
+### Build and compile
+
+In order to build and compile this repository use the provided Makefile:
+
+```
+make all
+```
+
+This operation generates the binaries for this repo, download dependencies,
+run existing tests and generate ready-to-deploy Kubernetes files.
+
+### Run tests
+
+Tests are executed using Ginkgo. To run all the available tests:
+
+```
+make test
+```
+
+### Integration tests
+
+Some integration test are included. To execute those, setup the following environment variables. 
+​
+
+​The following table contains the variables that activate the integration tests
+ 
+ | Variable  | Example Value | Description |
+ | ------------- | ------------- |------------- |
+ | RUN_INTEGRATION_TEST  | true | Run integration tests |
+ | IT_SCYLLA_HOST  | 127.0.0.1 | Scylla address |
+ | IT_SCYLLA_PORT | 9042 | Scylla Port |
+ | IT_NALEJ_KEYSPACE | testkeyspace | Test Schema |
+ 
+In a scylla deploy, database is required. Execute the following, you can create it executing: 
+```
+create KEYSPACE testkeyspace WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+create table testkeyspace.tableTest (id1 text, id2 text, id3 text, primary key (id1, id2));
+create table testkeyspace.basicTableTest (id1 text, id2 text, id3 text, primary key (id1));
+``` 
+
+### Update dependencies
+
+Dependencies are managed using Godep. For an automatic dependencies download use:
+
+```
+make dep
+```
+
+In order to have all dependencies up-to-date run:
+
+```
+dep ensure -update -v
+```
+
+
+## Contributing
+
+Please read [contributing.md](contributing.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+
+## Authors
+
+See also the list of [contributors](https://github.com/nalej/grpc-utils/contributors) who participated in this project.
+
+## License
+This project is licensed under the Apache 2.0 License - see the [LICENSE-2.0.txt](LICENSE-2.0.txt) file for details.
+# scylladb-utils
+
+This repository contains Scylladb helpers for building providers in Go
+
+    

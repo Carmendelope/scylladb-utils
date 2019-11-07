@@ -4,7 +4,7 @@
 
 [[constraint]]
     name="github.com/nalej/derrors"
-    version="=v2.0.0"
+    version="=v2.1.0"
 
 [[constraint]]
     name="github.com/scylladb/gocqlx"

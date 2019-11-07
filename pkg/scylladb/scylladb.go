@@ -1,5 +1,18 @@
 /*
- * Copyright (C)  2019 Nalej - All Rights Reserved
+ * Copyright 2019 Nalej
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package scylladb
@@ -21,7 +34,7 @@ import (
 const RowNotFoundMsg = "not found"
 
 // General purpose structure to be reused to build ScyllaDB providers on top sharing common functionality.
-type ScyllaDB struct{
+type ScyllaDB struct {
 	Address  string
 	Port     int
 	Keyspace string
@@ -29,7 +42,7 @@ type ScyllaDB struct{
 }
 
 // Connect to the ScyllaDB .
-func (s *ScyllaDB) Connect() derrors.Error{
+func (s *ScyllaDB) Connect() derrors.Error {
 	// connect to the cluster
 	conf := gocql.NewCluster(s.Address)
 	conf.Keyspace = s.Keyspace
@@ -79,7 +92,7 @@ func (s *ScyllaDB) CheckAndConnect() derrors.Error {
 // ----------------------------------------------------------------
 
 // UnsafeGenericExist checks if an element identified by a single primary key exists.
-func (s *ScyllaDB) UnsafeGenericExist(table string, pkColumn string, pkValue string) (bool, derrors.Error){
+func (s *ScyllaDB) UnsafeGenericExist(table string, pkColumn string, pkValue string) (bool, derrors.Error) {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return false, err
@@ -102,7 +115,7 @@ func (s *ScyllaDB) UnsafeGenericExist(table string, pkColumn string, pkValue str
 }
 
 // UnsafeAdd adds a new element to a table identified by a single primary key.
-func (s *ScyllaDB) UnsafeAdd(table string, pkColumn string, pkValue string, tableColumnNames []string, toAdd interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeAdd(table string, pkColumn string, pkValue string, tableColumnNames []string, toAdd interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
@@ -129,7 +142,7 @@ func (s *ScyllaDB) UnsafeAdd(table string, pkColumn string, pkValue string, tabl
 }
 
 // UnsafeUpdate updates an element in a table identified by a single primary key.
-func (s *ScyllaDB) UnsafeUpdate(table string, pkColumn string, pkValue string, tableColumnNames []string, toUpdate interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeUpdate(table string, pkColumn string, pkValue string, tableColumnNames []string, toUpdate interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
@@ -155,7 +168,7 @@ func (s *ScyllaDB) UnsafeUpdate(table string, pkColumn string, pkValue string, t
 }
 
 // UnsafeGet retrieves an element from a table identified by a single primary key.
-func (s *ScyllaDB) UnsafeGet(table string, pkColumn string, pkValue string, tableColumnNames []string, result * interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeGet(table string, pkColumn string, pkValue string, tableColumnNames []string, result *interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
@@ -177,7 +190,7 @@ func (s *ScyllaDB) UnsafeGet(table string, pkColumn string, pkValue string, tabl
 }
 
 // UnsafeRemove removes an element from a table identified by a single primary key.
-func (s* ScyllaDB) UnsafeRemove(table string, pkColumn string, pkValue string) derrors.Error{
+func (s *ScyllaDB) UnsafeRemove(table string, pkColumn string, pkValue string) derrors.Error {
 	if err := s.CheckAndConnect(); err != nil {
 		return err
 	}
@@ -187,7 +200,7 @@ func (s* ScyllaDB) UnsafeRemove(table string, pkColumn string, pkValue string) d
 	if err != nil {
 		return err
 	}
-	if ! exists {
+	if !exists {
 		return derrors.NewNotFoundError(pkValue)
 	}
 
@@ -201,19 +214,18 @@ func (s* ScyllaDB) UnsafeRemove(table string, pkColumn string, pkValue string) d
 	return nil
 }
 
-
 // ----------------------------------------------------------------
 // Others
 // ----------------------------------------------------------------
 
 // UnsafeClear truncates a set of tables.
-func (s* ScyllaDB) UnsafeClear(tableNames []string) derrors.Error{
+func (s *ScyllaDB) UnsafeClear(tableNames []string) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
 	}
 
-	for _, targetTable := range tableNames{
+	for _, targetTable := range tableNames {
 		query := fmt.Sprintf("TRUNCATE TABLE %s", targetTable)
 		// delete table
 		err := s.Session.Query(query).Exec()
@@ -230,7 +242,7 @@ func (s* ScyllaDB) UnsafeClear(tableNames []string) derrors.Error{
 // ----------------------------------------------------------------
 
 // UnsafeGenericExist checks if an element identified by a composite primary key exists.
-func (s * ScyllaDB) UnsafeGenericCompositeExist(table string, pkColumn map[string]interface{}) (bool, derrors.Error){
+func (s *ScyllaDB) UnsafeGenericCompositeExist(table string, pkColumn map[string]interface{}) (bool, derrors.Error) {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return false, err
@@ -238,7 +250,7 @@ func (s * ScyllaDB) UnsafeGenericCompositeExist(table string, pkColumn map[strin
 
 	var count int
 
-	sb:= qb.Select(table).CountAll()
+	sb := qb.Select(table).CountAll()
 	for p := range pkColumn {
 		sb = sb.Where(qb.Eq(p))
 	}
@@ -259,7 +271,7 @@ func (s * ScyllaDB) UnsafeGenericCompositeExist(table string, pkColumn map[strin
 }
 
 // UnsafeAdd adds a new element to a table identified by a composite primary key.
-func (s * ScyllaDB) UnsafeCompositeAdd(table string, pkColumn map[string]interface{}, tableColumnNames []string, toAdd interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeCompositeAdd(table string, pkColumn map[string]interface{}, tableColumnNames []string, toAdd interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
@@ -285,7 +297,7 @@ func (s * ScyllaDB) UnsafeCompositeAdd(table string, pkColumn map[string]interfa
 }
 
 // UnsafeUpdate updates an element in a table identified by a single primary key.
-func (s * ScyllaDB) UnsafeCompositeUpdate(table string, pkColumn map[string]interface{}, tableColumnNames []string, toUpdate interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeCompositeUpdate(table string, pkColumn map[string]interface{}, tableColumnNames []string, toUpdate interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
@@ -294,11 +306,11 @@ func (s * ScyllaDB) UnsafeCompositeUpdate(table string, pkColumn map[string]inte
 	if err != nil {
 		return err
 	}
-	if ! exists {
+	if !exists {
 		return derrors.NewNotFoundError(table).WithParams(getParams(pkColumn))
 	}
 
-	sb:= qb.Update(table).Set(tableColumnNames...)
+	sb := qb.Update(table).Set(tableColumnNames...)
 	for p := range pkColumn {
 		sb = sb.Where(qb.Eq(p))
 	}
@@ -315,13 +327,13 @@ func (s * ScyllaDB) UnsafeCompositeUpdate(table string, pkColumn map[string]inte
 }
 
 // UnsafeGet retrieves an element from a table identified by a composite primary key.
-func (s *ScyllaDB) UnsafeCompositeGet(table string, pkColumn map[string]interface{}, tableColumnNames []string, result * interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeCompositeGet(table string, pkColumn map[string]interface{}, tableColumnNames []string, result *interface{}) derrors.Error {
 	// check connection
 	if err := s.CheckAndConnect(); err != nil {
 		return err
 	}
 
-	sb:= qb.Select(table)
+	sb := qb.Select(table)
 	for p := range pkColumn {
 		sb = sb.Where(qb.Eq(p))
 	}
@@ -341,7 +353,7 @@ func (s *ScyllaDB) UnsafeCompositeGet(table string, pkColumn map[string]interfac
 }
 
 // UnsafeRemove removes an element from a table identified by a single primary key.
-func (s*ScyllaDB) UnsafeCompositeRemove(table string, pkColumn map[string]interface{}) derrors.Error{
+func (s *ScyllaDB) UnsafeCompositeRemove(table string, pkColumn map[string]interface{}) derrors.Error {
 	if err := s.CheckAndConnect(); err != nil {
 		return err
 	}
@@ -351,12 +363,12 @@ func (s*ScyllaDB) UnsafeCompositeRemove(table string, pkColumn map[string]interf
 	if err != nil {
 		return err
 	}
-	if ! exists {
+	if !exists {
 		return derrors.NewNotFoundError(table).WithParams(getParams(pkColumn))
 	}
 
 	// delete
-	sb:= qb.Delete(table)
+	sb := qb.Delete(table)
 	for p := range pkColumn {
 		sb = sb.Where(qb.Eq(p))
 	}
@@ -372,7 +384,7 @@ func (s*ScyllaDB) UnsafeCompositeRemove(table string, pkColumn map[string]interf
 	return nil
 }
 
-func getParams(pkColumn map[string]interface{})([]interface{}){
+func getParams(pkColumn map[string]interface{}) []interface{} {
 	params := make([]interface{}, 0)
 	for _, p := range pkColumn {
 		params = append(params, p)
