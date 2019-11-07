@@ -12,14 +12,14 @@ There are four types of functions
     - CheckConnection
     - CheckAndConnect 
     
-- Functions to access tables whose pk is composed of a single field
+- Functions to access tables whose pk is composed of a single field:
     - UnsafeGenericExist
     - UnsafeAdd
     - UnsafeUpdate
     - UnsafeGet
     - UnsafeRemove
     
-- Functions to access tables whose pk is composed of more than one field
+- Functions to access tables whose pk is composed of more than one field:
     - UnsafeGenericCompositeExist
     - UnsafeCompositeAdd
     - UnsafeCompositeUpdate
@@ -142,7 +142,7 @@ make test
 
 ### Integration tests
 
-Some integration test are included. To execute those, setup the following environment variables. 
+Some integration tests are included. To execute those, set up the following environment variables. 
 ​
 
 ​The following table contains the variables that activate the integration tests
@@ -154,7 +154,7 @@ Some integration test are included. To execute those, setup the following enviro
  | IT_SCYLLA_PORT | 9042 | Scylla Port |
  | IT_NALEJ_KEYSPACE | testkeyspace | Test Schema |
  
-In a scylla deploy, database is required. Execute the following, you can create it executing: 
+In a scylla deploy, a database is required. Execute the following, you can create it executing: 
 ```
 create KEYSPACE testkeyspace WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 create table testkeyspace.tableTest (id1 text, id2 text, id3 text, primary key (id1, id2));
