@@ -8,7 +8,6 @@
         "example-app other-app"
     ],
     "tools": [
-        "azure",
         "k8s",
         "docker"
     ]
